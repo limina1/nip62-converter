@@ -1,0 +1,18 @@
+=== Description
+The decrypt command decrypts a base64 NIP-44 ciphertext (or NIP-04 if specified) and returns the resulting plaintext.
+
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--nip04, -4`
+|use NIP-04 instead of NIP-44 (default: false)
+
+|`--sec value, -s value`
+|secret key to use for decryption
+
+|`--pub value, -p value`
+|public key that encrypted the message
+|===

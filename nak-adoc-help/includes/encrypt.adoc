@@ -1,0 +1,18 @@
+=== Description
+The encrypt command encrypts a string using NIP-44 (or NIP-04 if specified) and returns the resulting ciphertext as base64.
+
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--nip04, -4`
+|use NIP-04 instead of NIP-44 (default: false)
+
+|`--sec value, -s value`
+|secret key to use for encryption
+
+|`--pub value, -p value`
+|public key to encrypt for
+|===

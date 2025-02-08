@@ -1,0 +1,12 @@
+=== Description
+The encode command transforms various Nostr entities into their NIP-19 encoded forms.
+
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--prefix value, -p value`
+|use a specific prefix for the encoded result
+|===

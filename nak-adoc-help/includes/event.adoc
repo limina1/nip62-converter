@@ -1,0 +1,39 @@
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--kind value, -k value`
+|event kind number (default: 1)
+
+|`--pubkey value, -p value`
+|public key to use (default: derived from --sec)
+
+|`--sec value, -s value`
+|secret key to use (default: random)
+
+|`--created-at value, -t value`
+|unix timestamp for the created_at field (default: now)
+
+|`--content value, -c value`
+|event content
+
+|`--tags value, -g value`
+|add tag, format: 'name:value' e.g. -g e:xyz
+
+|`--relay value, -r value`
+|relay to send event to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+=== Description
+The event command generates an encoded event and either prints it or sends it to a set of relays.

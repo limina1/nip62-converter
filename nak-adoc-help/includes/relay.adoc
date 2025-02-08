@@ -1,0 +1,18 @@
+=== Description
+The relay command retrieves the relay information document from a specified relay.
+
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===

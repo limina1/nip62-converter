@@ -1,0 +1,394 @@
+= NAK: The Nostr Army Knife
+:toc: left
+:toclevels: 3
+:source-highlighter: rouge
+:icons: font
+
+This documentation covers the NAK (Nostr Army Knife) command-line tool and all its subcommands.
+
+== Overview
+
+NAK is a versatile command-line tool for interacting with the Nostr protocol.
+
+[source,shell]
+----
+nak [global options] [command [command options]] [arguments...]
+----
+
+=== Global Options
+
+* `--quiet, -q` - Do not print logs and info messages to stderr, use -qq to also not print anything to stdout
+* `--help, -h` - Show help
+* `--version, -v` - Print the version
+
+== Core Commands
+
+=== REQ Command
+The `req` command generates encoded REQ messages and optionally uses them to talk to relays.
+
+[source,shell]
+----
+nak req [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--authors value, -a value`
+|filter by author public key (can be specified multiple times)
+
+|`--ids value, -i value`
+|filter by event id (can be specified multiple times)
+
+|`--kinds value, -k value`
+|filter by event kind (can be specified multiple times)
+
+|`--tags value, -t value`
+|filter by presence of tag, format 'name:value', e.g. #e:xyz or -t e=xyz (can be specified multiple times)
+
+|`--since value, -s value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--until value, -u value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--limit value, -l value`
+|limit number of events returned
+
+|`--relay value, -r value`
+|relay to connect to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+=== COUNT Command
+The `count` command generates encoded COUNT messages and optionally uses them to talk to relays.
+
+[source,shell]
+----
+nak count [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--authors value, -a value`
+|filter by author public key (can be specified multiple times)
+
+|`--kinds value, -k value`
+|filter by event kind (can be specified multiple times)
+
+|`--tags value, -t value`
+|filter by presence of tag, format 'name:value', e.g. #e:xyz or -t e=xyz (can be specified multiple times)
+
+|`--since value, -s value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--until value, -u value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--relay value, -r value`
+|relay to connect to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+=== FETCH Command
+The `fetch` command retrieves events related to given nip19 or nip05 codes.
+
+[source,shell]
+----
+nak fetch [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--relay value, -r value`
+|relay to connect to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+The fetch command retrieves events related to the given nip19 or nip05 code from included relay hints or the author's NIP-65 relays.
+
+=== EVENT Command
+The `event` command generates encoded events for printing or relay transmission.
+
+[source,shell]
+----
+nak event [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--kind value, -k value`
+|event kind number (default: 1)
+
+|`--pubkey value, -p value`
+|public key to use (default: derived from --sec)
+
+|`--sec value, -s value`
+|secret key to use (default: random)
+
+|`--created-at value, -t value`
+|unix timestamp for the created_at field (default: now)
+
+|`--content value, -c value`
+|event content
+
+|`--tags value, -g value`
+|add tag, format: 'name:value' e.g. -g e:xyz
+
+|`--relay value, -r value`
+|relay to send event to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+== Encoding and Decoding
+
+=== DECODE Command
+The `decode` command handles nip19, nip21, nip05 or hex entities decoding.
+
+[source,shell]
+----
+nak decode [arguments...]
+----
+
+==== Description
+The decode command processes and decodes various Nostr identifiers and entities.
+
+==== Supported Formats
+* NIP-19 entities (nsec, npub, note, etc.)
+* NIP-21 URIs (nostr:...)
+* NIP-05 identifiers (user@domain)
+* Hexadecimal strings
+
+=== ENCODE Command
+The `encode` command converts notes and other content to nip19 entities.
+
+[source,shell]
+----
+nak encode [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--prefix value, -p value`
+|use a specific prefix for the encoded result
+|===
+
+== Key Management
+
+=== KEY Command
+The `key` command performs operations on secret keys: generate, derive, encrypt, decrypt.
+
+[source,shell]
+----
+nak key [command options] [arguments...]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--gen`
+|Generate a new random key pair
+
+|`--derive`
+|Derive a key pair from a BIP39 seed phrase
+
+|`--encrypt`
+|Encrypt a secret key with a passphrase
+
+|`--decrypt`
+|Decrypt an encrypted secret key with a passphrase
+|===
+
+=== VERIFY Command
+The `verify` command validates event hashes and signatures.
+
+[source,shell]
+----
+nak verify < event.json
+----
+
+==== Description
+The verify command checks the hash and signature of an event provided through stdin.
+
+==== Usage
+Pipe an event JSON to the command:
+
+[source,shell]
+----
+echo '{...event json...}' | nak verify
+----
+
+== Relay Operations
+
+=== RELAY Command
+The `relay` command retrieves relay information documents.
+
+[source,shell]
+----
+nak relay [command options] <relay-url>
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
+
+=== BUNKER Command
+The `bunker` command starts a NIP-46 signer daemon.
+
+[source,shell]
+----
+nak bunker [command options]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--sec value, -s value`
+|secret key to use (required)
+
+|`--name value, -n value`
+|name to announce (default: "nak")
+
+|`--relay value, -r value`
+|relay to connect to for receiving requests (can be specified multiple times)
+|===
+
+=== SERVE Command
+The `serve` command launches an in-memory relay for testing.
+
+[source,shell]
+----
+nak serve [command options]
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--listen value, -l value`
+|address to listen on (default: "127.0.0.1:7447")
+
+|`--origin value, -o value`
+|allowed origin for websocket upgrades (default: "*")
+|===
+
+== Encryption Operations
+
+=== ENCRYPT Command
+The `encrypt` command handles NIP-44/NIP-04 encryption.
+
+[source,shell]
+----
+nak encrypt [command options] <plaintext>
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--nip04, -4`
+|use NIP-04 instead of NIP-44 (default: false)
+
+|`--sec value, -s value`
+|secret key to use for encryption
+
+|`--pub value, -p value`
+|public key to encrypt for
+|===
+
+=== DECRYPT Command
+The `decrypt` command handles NIP-44/NIP-04 decryption.
+
+[source,shell]
+----
+nak decrypt [command options] <ciphertext>
+----
+
+==== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--nip04, -4`
+|use NIP-04 instead of NIP-44 (default: false)
+
+|`--sec value, -s value`
+|secret key to use for decryption
+
+|`--pub value, -p value`
+|public key that encrypted the message
+|===

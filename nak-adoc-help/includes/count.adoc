@@ -1,0 +1,33 @@
+=== Command Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--authors value, -a value`
+|filter by author public key (can be specified multiple times)
+
+|`--kinds value, -k value`
+|filter by event kind (can be specified multiple times)
+
+|`--tags value, -t value`
+|filter by presence of tag, format 'name:value', e.g. #e:xyz or -t e=xyz (can be specified multiple times)
+
+|`--since value, -s value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--until value, -u value`
+|filter by timestamp, must be a Unix timestamp in seconds
+
+|`--relay value, -r value`
+|relay to connect to (can be specified multiple times)
+
+|`--raw`
+|print raw messages from relay including subscriptions ids etc (default: false)
+
+|`--metadata`
+|print full relay connection/response metadata (default: false)
+
+|`--timeout value`
+|maximum time to wait for responses (default: 10s)
+|===
