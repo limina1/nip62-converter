@@ -1,5 +1,4 @@
 from typing import List, Dict, Tuple
-import os
 
 def parse_adoc_section(lines: List[str], start: int) -> Tuple[dict, int]:
     """Parse a section from the AsciiDoc content"""
@@ -30,6 +29,7 @@ def parse_adoc_section(lines: List[str], start: int) -> Tuple[dict, int]:
         'content': '\n'.join(content).strip()
     }, current_line
 
+
 def parse_adoc_file(file_path: str) -> dict:
     """Parse AsciiDoc file and return structured content"""
     print(f"\nDebug: Opening file {file_path}")
@@ -47,7 +47,7 @@ def parse_adoc_file(file_path: str) -> dict:
     sections = []
     current_line = start_line
     
-    # Get document title first
+    # Get document title from first level 1 heading
     title = ""
     for line in lines:
         if line.startswith('= '):
@@ -59,12 +59,16 @@ def parse_adoc_file(file_path: str) -> dict:
     while current_line < len(lines):
         line = lines[current_line]
         if line.startswith('='):
-            print(f"Debug: Found heading: {line.strip()}")
-            section, current_line = parse_adoc_section(lines, current_line)
-            if section['level'] > 0:  # Skip level 0 (document title)
+            level = len(line.split(' ')[0])  # Count the = signs
+            # Only process level 2 and deeper sections as content
+            if level >= 2:
+                print(f"Debug: Found heading: {line.strip()}")
+                section, current_line = parse_adoc_section(lines, current_line)
                 print(f"Debug: Adding section: {section['title']} (level {section['level']})")
                 print(f"Debug: Content length: {len(section['content'])} chars")
                 sections.append(section)
+            else:
+                current_line += 1
         else:
             current_line += 1
     

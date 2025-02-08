@@ -1,26 +1,48 @@
 import subprocess
+from typing import List, Dict
 
-def encode_event_id(event_id: str) -> str:
-    """Encode an event ID to nevent format using nak"""
+def encode_event_id(event: Dict, relays: List[str], note_format: bool = False) -> str:
+    """Encode an event ID to naddr/nevent format using nak"""
     try:
-        print(f"\nDebug: Encoding event ID: {event_id}")
+        # Build base command
+        cmd = ['nak', 'encode']
+        
+        if note_format:
+            # For specific event reference (nevent)
+            cmd.append('nevent')
+            cmd.append(event['id'])
+            # Add author hint
+            cmd.extend(['--author', event['pubkey']])
+        else:
+            # For replaceable event reference (naddr)
+            cmd.append('naddr')
+            # Required parameters for naddr
+            cmd.extend(['--kind', str(event['kind'])])
+            cmd.extend(['--pubkey', event['pubkey']])
+            # Get d tag from event tags
+            d_tag = next(tag[1] for tag in event['tags'] if tag[0] == 'd')
+            cmd.extend(['--identifier', d_tag])
+        
+        # Add relay hints
+        for relay in relays:
+            cmd.extend(['--relay', relay])
+            
+        print(f"Debug: Encode command: {' '.join(cmd)}")
+        
         result = subprocess.run(
-            ['nak', 'encode', 'note', event_id],
+            cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=10
+            stderr=subprocess.PIPE
         )
+        
         if result.returncode != 0:
             print("Debug: Encoding failed:")
             print(f"Debug: stderr: {result.stderr.decode()}")
             raise Exception(f"Failed to encode event: {result.stderr.decode()}")
         
         encoded = result.stdout.decode().strip()
-        print(f"Debug: Encoded successfully: {encoded}")
+        print(f"Debug: Encoded successfully as: {encoded}")
         return encoded
-    except subprocess.TimeoutExpired:
-        print("Error: Encoding timed out")
-        return event_id
     except Exception as e:
         print(f"Error encoding event: {e}")
-        return event_id
+        return event['id']
