@@ -1,0 +1,188 @@
+= NAK Utils: NIP-62 AsciiDoc Publisher
+:toc: left
+:toclevels: 3
+:source-highlighter: rouge
+
+A tool for publishing AsciiDoc documents as NIP-62 Nostr Publications.
+
+== Overview
+
+This tool converts AsciiDoc documents into NIP-62 Nostr events, creating a hierarchical publication structure. It supports both flat and nested section hierarchies, with configurable depth levels.
+
+== Prerequisites
+
+* Python 3.7+
+* `nak` command line tool installed and in PATH
+* A nostr encrypted private key (ncryptsec format)
+
+== Installation
+
+[source,bash]
+----
+git clone https://github.com/yourusername/nak-utils.git
+cd nak-utils
+chmod +x nip62_converter.py
+----
+
+== Usage
+
+=== Basic Usage
+
+[source,bash]
+----
+./nip62_converter.py \
+  --nsec path/to/your.ncryptsec \
+  --relays wss://relay1.com wss://relay2.com \
+  --adoc-file document.adoc
+----
+
+=== Options
+
+[cols="2,4"]
+|===
+|Option |Description
+
+|`--nsec`
+|Path to your encrypted private key file or the ncryptsec string directly
+
+|`--relays`
+|One or more relay URLs to publish to
+
+|`--adoc-file`
+|Path to your AsciiDoc file
+
+|`--max-level`
+|Optional: Maximum heading level to preserve (deeper levels will be flattened)
+|===
+
+=== Document Structure
+
+The tool expects AsciiDoc documents with the following structure:
+
+[source,asciidoc]
+----
+= Document Title
+
+== Section One
+Content for section one.
+
+=== Subsection One
+Content for subsection.
+
+== Section Two
+Content for section two.
+----
+
+=== Hierarchical vs Flat Output
+
+==== Full Hierarchy
+
+By default, the tool maintains the full section hierarchy:
+
+[source,bash]
+----
+./nip62_converter.py \
+  args
+  --adoc-file document.adoc
+----
+
+==== Flattened Structure
+
+To flatten sections beyond a certain level:
+
+[source,bash]
+----
+./nip62_converter.py \
+  --nsec ~/.config/nostr/profiles/your.ncryptsec \
+  --relays wss://relay1.com wss://relay2.com \
+  --adoc-file document.adoc \
+  --max-level 2
+----
+
+This will combine any sections deeper than level 2 into their parent sections.
+
+== NIP-62 Event Structure
+
+=== Index Event (kind 30040)
+* Contains metadata about the publication
+* Links to all section events
+* Uses `d` tag for unique identification
+* Uses `a` tags to reference sections
+
+=== Section Events (kind 30041)
+* Contain actual section content
+* Include title and content
+* Use `d` tag for unique identification
+* Support AsciiDoc formatting
+
+== Example
+
+.test.adoc
+[source,asciidoc]
+----
+= Test Publication
+
+== Section One
+This is a test section with some content.
+
+[source,bash]
+----
+echo "Hello from code block!"
+----
+
+== Section Two
+Another section with different formatting:
+
+* Bullet point 1
+* Bullet point 2
+* Bullet point 3
+
+=== Subsection
+Testing nested sections with _italic_ and *bold* text.
+----
+
+.Publishing the document
+[source,bash]
+----
+./nip62_converter.py \
+  --nsec ~/.config/nostr/profiles/your.ncryptsec \
+  --relays wss://relay1.com wss://relay2.com \
+  --adoc-file test.adoc
+----
+
+== Output References
+
+After successful publication, the tool provides:
+
+* `nevent`: Reference to this specific version
+* `naddr`: Reference to the replaceable event
+
+These can be used with clients that support NIP-62 to view the publication.
+
+== Error Handling
+
+The tool includes:
+
+* Retry logic for failed publications
+* Verification of published events
+* Detailed debug output
+
+== Development
+
+=== Project Structure
+
+[source]
+----
+nak-utils/
+├── modules/
+│   ├── adoc_parser.py      # AsciiDoc parsing
+│   ├── event_creator.py    # Event creation
+│   ├── event_encoder.py    # Event ID encoding
+│   ├── event_publisher.py  # Event publishing
+│   ├── event_utils.py      # Event utilities
+│   ├── event_verifier.py   # Event verification
+│   ├── key_utils.py        # Key handling
+│   └── tag_utils.py        # Tag manipulation
+└── nip62_converter.py      # Main script
+----
+
