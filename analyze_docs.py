@@ -69,9 +69,8 @@ def analyze_code(content: str, header_name: str) -> str:
         max_retries=3,
     )
 
-    template = """You are analyzing Code code to generate documentation.
+    template = """You are analyzing code to generate documentation.
     Please analyze the following code section of a project and provide a clear, concise documentation. It may include as needed:
-
     1. Overview of what the code does
     2. Arguments and inputs
     3. Usage examples
@@ -80,10 +79,19 @@ def analyze_code(content: str, header_name: str) -> str:
     6. Any notable patterns or algorithms used
     7. Imports and project related files
     8. Dependencies and requirements
-    
+
+    DOCUMENTATION PRINCIPLES:
+    - Document ONLY what is explicitly present in the provided code
+    - Focus exclusively on observable functionality and implementation
+    - Make NO assumptions about external modules not defined in the code
+    - Avoid speculative language like "likely part of" or "probably connects to"
+    - If an import is used but not defined in the provided code, simply document the import name without speculation about its implementation
+    - When referencing imported modules, state only their observed usage without assumptions about their internal workings
+
     Format your response in proper AsciiDoc format. Make the documentation technical but clear, concise, and accessible.
     The user will start with the header to insert at, followed by the code. Do not include the header in your response, and only use level three headings (===) or lower.
-    The purpose is to provide concise, semantically closed information about this section (meaning there should be nothing vague with respect to the file, assume other documentation will be provided for imports) with respect to the larger project.
+    The purpose is to provide concise, semantically closed information about this specific code section.
+
     Code to analyze:
     {content}
     """
