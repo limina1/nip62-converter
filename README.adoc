@@ -1,25 +1,10 @@
 = AsciiDoc to NIP-62 Nostr Converter
-:author: Your Name
-:email: your.email@example.com
-:revnumber: 1.0
-:revdate: 2025-03-23
-:toc: left
-:toclevels: 3
-:sectnums:
-:source-highlighter: highlight.js
+A tool for converting AsciiDoc documents into NIP-62 Nostr publications.
 
-A comprehensive tool for converting AsciiDoc documents into NIP-62 Nostr publications.
 
-== INTRODUCTION
+== Key Capabilities
 
-This utility converts AsciiDoc documents into a hierarchy of NIP-62 Nostr events, facilitating structured content publication on the Nostr protocol. The converter systematically extracts metadata, organizes document sections, and generates appropriate event structures while maintaining semantic relationships between content elements.
-
-=== Key Capabilities
-
-* Extracts comprehensive metadata from AsciiDoc documents
-* Preserves hierarchical document structure (chapters, sections, subsections)
-* Generates compliant NIP-62 event types (30040 and 30041)
-* Creates verifiable and publishable Nostr events
+* Extracts metadata from AsciiDoc documents
 * Supports multiple relay publishing
 
 == INSTALLATION
