@@ -235,7 +235,6 @@ The converter generates two types of events:
 
 * Created for each level 2 section
 * Contains section title, content, and relevant metadata
-* Maintains hierarchical relationship to parent sections
 
 ==== Publication Index (kind 30040)
 
