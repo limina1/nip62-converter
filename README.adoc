@@ -74,9 +74,7 @@ python adoc_to_nostr.py --nsec nsec1your_private_key \
                         --author-pubkey npub1satoshis_public_key
 ----
 
-== DOCUMENT PARSING ARCHITECTURE
-
-=== Parsing Methodology
+=== Parsing Flow
 
 The converter implements a structured parsing methodology:
 
@@ -90,16 +88,6 @@ The converter implements a structured parsing methodology:
 === Metadata Extraction Process
 
 The converter systematically extracts metadata from the preamble section (between the document title and first content section):
-
-[source,python]
-----
-def extract_metadata(file_path: str) -> Dict[str, str]:
-    """
-    Extract metadata from the section between title and first section.
-    Returns a dictionary with metadata keys and values.
-    """
-    # Implementation details...
-----
 
 The extraction process:
 
@@ -125,7 +113,7 @@ For each organizational level:
 
 == DOCUMENT SCHEMA SPECIFICATION
 
-=== Required Structure
+=== Structure
 
 [source,asciidoc]
 ----
@@ -253,76 +241,10 @@ The converter generates two types of events:
 
 * *Section Indices*: Created for each level 1 section, referencing its level 2 sections
 * *Root Index*: Master index referencing all section indices
-* Contains comprehensive metadata from document preamble
+* Contains metadata from document preamble
 
-== COMPLETE DOCUMENT EXAMPLE
-
-[source,asciidoc]
-----
-= 21 Lessons
-image::https://example.com/cover-image.jpg[]
-:author: Der Gigi
-:published: 2019-12-18
-:publisher: public domain
-:language: en, ISO-639-1
-:tags: Bitcoin, nonfiction, economics
-:source: https://21lessons.com/toc
-:version: 1
-:type: book
-
-Falling down the Bitcoin rabbit hole is a strange experience. Like many others,
-I feel like I have learned more in the last couple of years studying Bitcoin than
-I have during two decades of formal education.
-
-== Chapter I - Philosophy
-
-Introduction to the philosophical aspects of Bitcoin...
-
-=== Lesson 1 - Immutability and Change
-
-Content for lesson 1...
-
-=== Lesson 2 - The Scarcity of Scarcity
-
-Content for lesson 2...
-
-== Chapter II - Economics
-
-Introduction to economic principles...
-
-=== Lesson 8 - Financial Ignorance
-
-Content for lesson 8...
-----
-
-=== Generated Event Structure
-
-This document generates:
-
-* Content events (kind 30041) for each lesson
-* Section index events (kind 30040) for each chapter
-* A root index event (kind 30040) with comprehensive metadata
 
 == TROUBLESHOOTING PROCEDURES
-
-=== Common Issues
-
-[cols="1,2"]
-|===
-|Issue |Resolution
-
-|Metadata not extracted properly
-|Ensure metadata is placed between title and first section header
-
-|Missing images
-|Verify image URLs are correctly formatted with `image::URL[]` syntax
-
-|Event verification failure
-|Check key formatting and permissions
-
-|Publication not appearing in relays
-|Verify relay connectivity and permissions
-|===
 
 === Diagnostic Output
 
@@ -331,8 +253,6 @@ The converter provides detailed progress information:
 * Metadata extraction summary
 * Event creation status
 * Publication references (nevent and naddr formats)
-
-== EXTENSIBILITY CONSIDERATIONS
 
 === Custom Metadata
 
