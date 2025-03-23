@@ -1,4 +1,5 @@
 from typing import List, Dict
+from .event_creator import create_event, create_a_tag
 
 
 def print_event_summary(event: dict) -> None:
@@ -40,3 +41,20 @@ def get_title_from_tags(tags: List[List[str]]) -> str:
                 return title
 
     return "Untitled"
+
+
+def create_traceback_event(link_a_tag, parent_a_tag, primary_relay, key, decrypt=False):
+    return create_event(
+        30043, "", [link_a_tag, parent_a_tag, ["link-kind", "30041"]], key, decrypt
+    )
+
+
+def create_traceback_events_from_index(index_event, primary_relay, key, decrypt=False):
+    events = []
+    index_a_tag = create_a_tag(index_event, primary_relay)
+    for tag in index_event["tags"]:
+        if tag[0] == "a":
+            events.append(
+                create_traceback_event(tag, index_a_tag, primary_relay, key, decrypt)
+            )
+    return events

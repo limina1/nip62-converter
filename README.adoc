@@ -1,188 +1,364 @@
-= NAK Utils: NIP-62 AsciiDoc Publisher
+= AsciiDoc to NIP-62 Nostr Converter
+:author: Your Name
+:email: your.email@example.com
+:revnumber: 1.0
+:revdate: 2025-03-23
 :toc: left
 :toclevels: 3
-:source-highlighter: rouge
+:sectnums:
+:source-highlighter: highlight.js
 
-A tool for publishing AsciiDoc documents as NIP-62 Nostr Publications.
+A comprehensive tool for converting AsciiDoc documents into NIP-62 Nostr publications.
 
-== Overview
+== INTRODUCTION
 
-This tool converts AsciiDoc documents into NIP-62 Nostr events, creating a hierarchical publication structure. It supports both flat and nested section hierarchies, with configurable depth levels.
+This utility converts AsciiDoc documents into a hierarchy of NIP-62 Nostr events, facilitating structured content publication on the Nostr protocol. The converter systematically extracts metadata, organizes document sections, and generates appropriate event structures while maintaining semantic relationships between content elements.
 
-== Prerequisites
+=== Key Capabilities
+
+* Extracts comprehensive metadata from AsciiDoc documents
+* Preserves hierarchical document structure (chapters, sections, subsections)
+* Generates compliant NIP-62 event types (30040 and 30041)
+* Creates verifiable and publishable Nostr events
+* Supports multiple relay publishing
+
+== INSTALLATION
+
+=== Prerequisites
 
 * Python 3.7+
-* `nak` command line tool installed and in PATH
-* A nostr encrypted private key (ncryptsec format)
+* Dependencies:
+** `nostr-sdk` or equivalent modules for Nostr event handling
+** AsciiDoc parsing capabilities
 
-== Installation
-
-[source,bash]
-----
-git clone https://github.com/yourusername/nak-utils.git
-cd nak-utils
-chmod +x nip62_converter.py
-----
-
-== Usage
-
-=== Basic Usage
+=== Setup Process
 
 [source,bash]
 ----
-./nip62_converter.py \
-  --nsec path/to/your.ncryptsec \
-  --relays wss://relay1.com wss://relay2.com \
-  --adoc-file document.adoc
+# Clone repository
+git clone https://github.com/yourusername/asciidoc-to-nostr.git
+
+# Install dependencies
+cd asciidoc-to-nostr
+pip install -r requirements.txt
 ----
 
-=== Options
+== USAGE FRAMEWORK
 
-[cols="2,4"]
+=== Command Line Interface
+
+[source,bash]
+----
+python adoc_to_nostr.py --nsec <nsec_key_or_file_path>
+                        --relays <relay_url1> [<relay_url2> ...]
+                        --adoc-file <path_to_asciidoc_file>
+                        [--author <author_name>]
+                        [--author-pubkey <author_pubkey>]
+----
+
+=== Parameters
+
+[cols="1,3"]
 |===
-|Option |Description
+|Parameter |Description
 
 |`--nsec`
-|Path to your encrypted private key file or the ncryptsec string directly
+|Your Nostr private key in nsec format or a file path containing your encrypted key
 
 |`--relays`
-|One or more relay URLs to publish to
+|One or more Nostr relay URLs where events will be published
 
 |`--adoc-file`
-|Path to your AsciiDoc file
+|Path to the AsciiDoc file to convert
 
-|`--max-level`
-|Optional: Maximum heading level to preserve (deeper levels will be flattened)
+|`--author`
+|Optional author name (overrides document metadata if specified)
+
+|`--author-pubkey`
+|Optional author public key in hex or npub format
 |===
 
-=== Document Structure
+=== Execution Example
 
-The tool expects AsciiDoc documents with the following structure:
+[source,bash]
+----
+python adoc_to_nostr.py --nsec nsec1your_private_key \
+                        --relays wss://relay.nostr.com wss://nostr.example.org \
+                        --adoc-file my_document.adoc \
+                        --author "Satoshi Nakamoto" \
+                        --author-pubkey npub1satoshis_public_key
+----
+
+== DOCUMENT PARSING ARCHITECTURE
+
+=== Parsing Methodology
+
+The converter implements a structured parsing methodology:
+
+. *Document Reading*: Loads and processes the AsciiDoc file
+. *Metadata Extraction*: Isolates and extracts metadata elements
+. *Section Organization*: Identifies hierarchical structure
+. *Event Generation*: Creates appropriate Nostr events
+. *Event Verification*: Validates event integrity
+. *Event Publication*: Transmits events to specified relays
+
+=== Metadata Extraction Process
+
+The converter systematically extracts metadata from the preamble section (between the document title and first content section):
+
+[source,python]
+----
+def extract_metadata(file_path: str) -> Dict[str, str]:
+    """
+    Extract metadata from the section between title and first section.
+    Returns a dictionary with metadata keys and values.
+    """
+    # Implementation details...
+----
+
+The extraction process:
+
+1. Identifies the document title (first level-1 heading)
+2. Locates the boundary between metadata and content sections
+3. Parses AsciiDoc attributes (`:key: value` format)
+4. Extracts non-attribute content as summary text
+5. Identifies and processes special elements (images, tags, etc.)
+
+=== Section Organization Principles
+
+Documents are parsed into a hierarchical structure:
+
+* *Level 1* (`=`): Document title or root section
+* *Level 2* (`==`): Primary sections or chapters
+* *Level 3+* (`===`, `====`, etc.): Subsections
+
+For each organizational level:
+
+* Content directly under level 1 headings is preserved
+* Level 2 sections are processed as independent content units
+* Level 3+ sections are incorporated into their parent level 2 sections
+
+== DOCUMENT SCHEMA SPECIFICATION
+
+=== Required Structure
 
 [source,asciidoc]
 ----
 = Document Title
+image::https://example.com/cover-image.jpg[]
+:author: Author Name
+:published: YYYY-MM-DD
+:publisher: Publisher Name
+:other_attributes: values
 
-== Section One
-Content for section one.
+Summary text goes here. This can span multiple paragraphs and will be
+extracted as the publication summary.
 
-=== Subsection One
-Content for subsection.
+== First Section Title
 
-== Section Two
-Content for section two.
+Section content...
+
+=== Subsection Title
+
+Subsection content...
 ----
 
-=== Hierarchical vs Flat Output
+=== Metadata Components
 
-==== Full Hierarchy
+==== Standard Attributes
 
-By default, the tool maintains the full section hierarchy:
+[cols="1,1,2"]
+|===
+|Attribute |NIP-62 Tag |Description
 
-[source,bash]
-----
-./nip62_converter.py \
-  args
-  --adoc-file document.adoc
-----
+|`:author:`
+|`author`
+|Document creator
 
-==== Flattened Structure
+|`:published:`
+|`published_on`
+|Publication date (YYYY-MM-DD format)
 
-To flatten sections beyond a certain level:
+|`:publisher:`
+|`published_by`
+|Publishing entity
 
-[source,bash]
-----
-./nip62_converter.py \
-  --nsec ~/.config/nostr/profiles/your.ncryptsec \
-  --relays wss://relay1.com wss://relay2.com \
-  --adoc-file document.adoc \
-  --max-level 2
-----
+|`:tags:`
+|`t`
+|Comma-separated list of topic tags
 
-This will combine any sections deeper than level 2 into their parent sections.
+|`:language:`
+|`l`
+|Content language (ISO format recommended)
 
-== NIP-62 Event Structure
+|`:version:`
+|`version`
+|Document version identifier
 
-=== Index Event (kind 30040)
-* Contains metadata about the publication
-* Links to all section events
-* Uses `d` tag for unique identification
-* Uses `a` tags to reference sections
+|`:source:`
+|`source`
+|Original document source
 
-=== Section Events (kind 30041)
-* Contain actual section content
-* Include title and content
-* Use `d` tag for unique identification
-* Support AsciiDoc formatting
+|`:type:`
+|`type`
+|Publication type (book, article, etc.)
+|===
 
-== Example
+==== Customized Attributes
 
-.test.adoc
+Any additional attributes will be converted to corresponding tags in the NIP-62 event:
+
 [source,asciidoc]
 ----
-= Test Publication
-
-== Section One
-This is a test section with some content.
-
-[source,bash]
-----
-echo "Hello from code block!"
+:reading_direction: left-to-right
 ----
 
-== Section Two
-Another section with different formatting:
+Becomes:
 
-* Bullet point 1
-* Bullet point 2
-* Bullet point 3
-
-=== Subsection
-Testing nested sections with _italic_ and *bold* text.
+[source,json]
+----
+["reading-direction", "left-to-right"]
 ----
 
-.Publishing the document
-[source,bash]
+Note: Multi-word attributes are converted to kebab-case in the resulting tags.
+
+==== Images
+
+Cover image immediately following title:
+
+[source,asciidoc]
 ----
-./nip62_converter.py \
-  --nsec ~/.config/nostr/profiles/your.ncryptsec \
-  --relays wss://relay1.com wss://relay2.com \
-  --adoc-file test.adoc
-----
-
-== Output References
-
-After successful publication, the tool provides:
-
-* `nevent`: Reference to this specific version
-* `naddr`: Reference to the replaceable event
-
-These can be used with clients that support NIP-62 to view the publication.
-
-== Error Handling
-
-The tool includes:
-
-* Retry logic for failed publications
-* Verification of published events
-* Detailed debug output
-
-== Development
-
-=== Project Structure
-
-[source]
-----
-nak-utils/
-├── modules/
-│   ├── adoc_parser.py      # AsciiDoc parsing
-│   ├── event_creator.py    # Event creation
-│   ├── event_encoder.py    # Event ID encoding
-│   ├── event_publisher.py  # Event publishing
-│   ├── event_utils.py      # Event utilities
-│   ├── event_verifier.py   # Event verification
-│   ├── key_utils.py        # Key handling
-│   └── tag_utils.py        # Tag manipulation
-└── nip62_converter.py      # Main script
+= Document Title
+image::https://example.com/cover-image.jpg[]
 ----
 
+In-content images:
+
+[source,asciidoc]
+----
+image::https://example.com/figure1.jpg[]
+----
+
+==== Summary Text
+
+All non-attribute text between the metadata section and first section heading is extracted as the document summary:
+
+[source,asciidoc]
+----
+= Document Title
+:author: Author Name
+
+This is the document summary. It will be used as the publication summary
+in the NIP-62 event.
+
+== First Section
+----
+
+=== Event Generation Framework
+
+The converter generates two types of events:
+
+==== Publication Content (kind 30041)
+
+* Created for each level 2 section
+* Contains section title, content, and relevant metadata
+* Maintains hierarchical relationship to parent sections
+
+==== Publication Index (kind 30040)
+
+* *Section Indices*: Created for each level 1 section, referencing its level 2 sections
+* *Root Index*: Master index referencing all section indices
+* Contains comprehensive metadata from document preamble
+
+== COMPLETE DOCUMENT EXAMPLE
+
+[source,asciidoc]
+----
+= 21 Lessons
+image::https://example.com/cover-image.jpg[]
+:author: Der Gigi
+:published: 2019-12-18
+:publisher: public domain
+:language: en, ISO-639-1
+:tags: Bitcoin, nonfiction, economics
+:source: https://21lessons.com/toc
+:version: 1
+:type: book
+
+Falling down the Bitcoin rabbit hole is a strange experience. Like many others,
+I feel like I have learned more in the last couple of years studying Bitcoin than
+I have during two decades of formal education.
+
+== Chapter I - Philosophy
+
+Introduction to the philosophical aspects of Bitcoin...
+
+=== Lesson 1 - Immutability and Change
+
+Content for lesson 1...
+
+=== Lesson 2 - The Scarcity of Scarcity
+
+Content for lesson 2...
+
+== Chapter II - Economics
+
+Introduction to economic principles...
+
+=== Lesson 8 - Financial Ignorance
+
+Content for lesson 8...
+----
+
+=== Generated Event Structure
+
+This document generates:
+
+* Content events (kind 30041) for each lesson
+* Section index events (kind 30040) for each chapter
+* A root index event (kind 30040) with comprehensive metadata
+
+== TROUBLESHOOTING PROCEDURES
+
+=== Common Issues
+
+[cols="1,2"]
+|===
+|Issue |Resolution
+
+|Metadata not extracted properly
+|Ensure metadata is placed between title and first section header
+
+|Missing images
+|Verify image URLs are correctly formatted with `image::URL[]` syntax
+
+|Event verification failure
+|Check key formatting and permissions
+
+|Publication not appearing in relays
+|Verify relay connectivity and permissions
+|===
+
+=== Diagnostic Output
+
+The converter provides detailed progress information:
+
+* Metadata extraction summary
+* Event creation status
+* Publication references (nevent and naddr formats)
+
+== EXTENSIBILITY CONSIDERATIONS
+
+=== Custom Metadata
+
+The converter supports arbitrary metadata attributes that will be converted to tags in the NIP-62 events. To add custom metadata:
+
+[source,asciidoc]
+----
+:custom_field: Custom Value
+----
+
+=== Relay Considerations
+
+* Primary relay is used for references but events are published to all specified relays
+* Publication coordinates (nevent and naddr) are provided for easy sharing
