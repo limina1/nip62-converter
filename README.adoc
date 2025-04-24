@@ -1,6 +1,7 @@
 = AsciiDoc to NIP-62 Nostr Converter
-A tool for converting AsciiDoc documents into NIP-62 Nostr publications. Uses Nak for nostr functionality.
 
+
+A tool for converting AsciiDoc documents into NIP-62 Nostr publications. Uses Nak for nostr functionality.
 
 == Key Capabilities
 
