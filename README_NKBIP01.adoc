@@ -1,0 +1,287 @@
+= NAK Utils - Nostr Publication Tools
+A comprehensive toolkit for converting and publishing documents to Nostr, with full support for NIP-62 and NKBIP-01 specifications.
+
+== Overview
+
+NAK Utils provides tools for converting AsciiDoc documents into Nostr publications. It supports both NIP-62 basic publications and the enhanced NKBIP-01 specification for fully compliant, structured content.
+
+== Key Features
+
+* Full NKBIP-01 compliance with validation
+* Hierarchical document organization
+* Rich metadata extraction and tagging
+* Multiple publication types (books, academic papers, documentation)
+* External content support with attribution
+* DOI and ISBN identifier support
+* Batch publishing to multiple relays
+* Event verification and validation
+
+== Installation
+
+=== Prerequisites
+
+* Python 3.7+
+* `nak` CLI tool (required for Nostr operations)
+* Required Python packages:
+** `metadata_parser` - URL metadata extraction
+** `habanero` - DOI metadata lookup  
+** `sentence_transformers` - Vector embeddings (optional)
+
+=== Setup
+
+[source,bash]
+----
+# Clone repository
+git clone https://github.com/yourusername/nak-utils.git
+cd nak-utils
+
+# Install dependencies (create requirements.txt first)
+pip install metadata_parser habanero
+----
+
+== Quick Start
+
+=== NKBIP-01 Compliant Upload (Recommended)
+
+[source,bash]
+----
+# Upload a book
+python nkb_uploader.py \
+    --nsec /path/to/encrypted.key \
+    --relays wss://relay.nostr.com wss://nostr.example.com \
+    --file my_book.adoc \
+    --type book
+
+# Upload an academic paper with DOI
+python nkb_uploader.py \
+    --nsec nsec1yourkey... \
+    --relays wss://relay.nostr.com \
+    --file paper.adoc \
+    --type academic \
+    --doi 10.1234/example \
+    --external
+----
+
+=== Legacy NIP-62 Upload
+
+[source,bash]
+----
+python nip62_converter.py \
+    --nsec <key_or_file> \
+    --relays <relay_urls> \
+    --adoc-file <file.adoc> \
+    --author <name>
+----
+
+== Document Structure
+
+=== AsciiDoc Format
+
+Documents should follow this structure:
+
+[source,asciidoc]
+----
+= Document Title
+image::cover-image.jpg[]
+:author: Author Name
+:published: 2024-01-01
+:tags: topic1, topic2
+:language: en
+
+Summary paragraph here...
+
+== Chapter/Section 1
+
+Content...
+
+=== Subsection
+
+More content...
+
+== Chapter/Section 2
+
+Content...
+----
+
+=== Metadata Fields
+
+[cols="1,1,2"]
+|===
+|Field |Tag |Description
+
+|`:author:`
+|`author`
+|Document creator
+
+|`:published:`
+|`published_on`
+|Publication date (YYYY-MM-DD)
+
+|`:publisher:`
+|`published_by`
+|Publishing entity
+
+|`:tags:`
+|`t`
+|Comma-separated topic tags
+
+|`:language:`
+|`l`
+|ISO-639-1 language code
+
+|`:type:`
+|`type`
+|Publication type (book, academic, etc.)
+
+|`:doi:`
+|`i`, `k`
+|DOI identifier
+
+|`:isbn:`
+|`i`, `k`
+|ISBN identifier
+
+|`:version:`
+|`version`
+|Document version
+|===
+
+== NKBIP-01 Compliance
+
+=== Event Structure
+
+* **Kind 30040**: Publication index (table of contents)
+  - Empty content field
+  - Contains metadata and references to content
+  - Replaceable by `d` tag
+
+* **Kind 30041**: Publication content (sections/chapters)
+  - Contains actual text content
+  - Linked from index via `a` tags
+
+=== Required Tags
+
+All NKBIP-01 events must include:
+
+* `d` - Unique identifier
+* `title` - Human-readable title  
+* `m` - MIME type
+* `M` - Nostr categorization
+* `l` - Language (ISO-639-1 format)
+
+Index events additionally require:
+* `auto-update` - Update behavior (yes/ask/no)
+* At least one `a` tag reference
+
+=== Validation
+
+Validate events before publishing:
+
+[source,bash]
+----
+# Validate without publishing
+python nkb_uploader.py --file document.adoc --validate-only
+
+# Validate existing event
+python validate_nkbip01.py event.json
+
+# Show example valid events
+python validate_nkbip01.py --example
+----
+
+== Examples
+
+Example templates are provided in `examples/templates/`:
+
+* `nkbip01_book_template.adoc` - Book with chapters
+* `nkbip01_academic_template.adoc` - Academic paper with DOI
+* `nkbip01_docs_template.adoc` - Technical documentation
+
+== Advanced Usage
+
+=== External Content
+
+For content published elsewhere:
+
+[source,bash]
+----
+python nkb_uploader.py \
+    --file article.adoc \
+    --external \
+    --doi 10.1234/example \
+    --author-pubkey npub1original...
+----
+
+=== Custom Metadata
+
+Add custom metadata in your AsciiDoc:
+
+[source,asciidoc]
+----
+:custom-field: Custom Value
+:reading-level: advanced
+:subject-area: Computer Science
+----
+
+=== Batch Processing
+
+Process multiple documents:
+
+[source,bash]
+----
+for file in *.adoc; do
+    python nkb_uploader.py --file "$file" --type book
+done
+----
+
+== Troubleshooting
+
+=== Common Issues
+
+1. **Missing `nak` CLI**: Install from https://github.com/fiatjaf/nak
+2. **Key decryption fails**: Ensure correct password and file permissions
+3. **Relay connection errors**: Check relay URLs and network connectivity
+4. **Validation errors**: Run validator to identify missing tags
+
+=== Debug Mode
+
+For detailed output during processing, check event summaries displayed before publishing.
+
+== Development
+
+=== Running Tests
+
+[source,bash]
+----
+# Test with sample document
+python test_script.py --nsec <key> --relays <relay> --adoc-file <file>
+
+# Run validation tests
+python validate_nkbip01.py --example
+----
+
+=== Contributing
+
+1. Follow NKBIP-01 specification
+2. Maintain backward compatibility
+3. Add tests for new features
+4. Update documentation
+
+== Migration from Legacy
+
+To migrate existing NIP-62 documents to NKBIP-01:
+
+1. Run `python migrate_to_nkbip01.py` to update tag utilities
+2. Use `nkb_uploader.py` instead of `nip62_converter.py`
+3. Validate all events before republishing
+
+== License
+
+[Specify your license here]
+
+== References
+
+* link:https://github.com/nostr-protocol/nips/blob/master/62.md[NIP-62: Event Hierarchies]
+* link:nips/NKBIP-01.adoc[NKBIP-01: Publication Specification]
+* link:nips/NKBIP-04.adoc[NKBIP-04: Tagging Guidelines]
+* link:nips/NKBIP-06.adoc[NKBIP-06: Extended Tags]
