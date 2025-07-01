@@ -266,3 +266,179 @@ The converter supports arbitrary metadata attributes that will be converted to t
 
 * Primary relay is used for references but events are published to all specified relays
 * Publication coordinates (nevent and naddr) are provided for easy sharing
+
+== OER TO NOSTR PIPELINE
+
+The `oer_to_nkbip.py` tool enables conversion of Open Educational Resources (OER) metadata into NKBIP-01 compliant Nostr publications. This creates a bridge between traditional educational repositories and the decentralized Nostr ecosystem.
+
+=== Key Features
+
+* Fetches metadata from OER repositories (via OERSI API)
+* Supports three modes: Course, Standalone, and Collection
+* Flexible content sorting with pattern matching
+* Export to AsciiDoc for offline editing
+* Preserves all educational metadata (license, author, keywords, etc.)
+
+=== Usage Modes
+
+==== Course Mode (Default)
+For courses with multiple lectures/modules:
+
+[source,bash]
+----
+python oer_to_nkbip.py \
+    --nsec /path/to/key \
+    --relays wss://relay.com \
+    --oer-url https://oersi.org/resources/[course-id]
+----
+
+==== Standalone Mode
+For single educational resources (creates both index and content):
+
+[source,bash]
+----
+python oer_to_nkbip.py \
+    --nsec /path/to/key \
+    --relays wss://relay.com \
+    --oer-url https://oersi.org/resources/[resource-id] \
+    --standalone
+----
+
+==== Collection Mode
+For curating multiple resources into a single publication:
+
+[source,bash]
+----
+python oer_to_nkbip.py \
+    --nsec /path/to/key \
+    --relays wss://relay.com \
+    --oer-url [url1] [url2] [url3] \
+    --collection-title "Curated Learning Path on Topic X"
+----
+
+=== Content Sorting
+
+The tool supports sophisticated pattern-based sorting for organizing course materials:
+
+[source,bash]
+----
+python oer_to_nkbip.py \
+    --oer-url [course-url] \
+    --sort-pattern "1:^7\.016" \              # Course intro items first
+    --sort-pattern "2:Lecture (\d+)" \        # Lectures in numerical order
+    --sort-pattern "3:Exam (\d+)(?!.*Solution)" \  # Exams
+    --sort-pattern "4:Exam (\d+).*Solution"   # Exam solutions
+----
+
+Pattern format: `priority:regex` where:
+* `priority` - Lower numbers appear first
+* `regex` - Regular expression with optional capture group for numerical sorting
+
+Common patterns:
+* `"1:Lecture (\d+)"` - Lectures numbered 1, 2, 3...
+* `"1:Week (\d+)"` - Weekly modules
+* `"1:Module (\d+)"` - Modular courses
+* `"2:Assignment (\d+)"` - Assignments after lectures
+
+=== Export to AsciiDoc
+
+Export OER content to an editable AsciiDoc file:
+
+[source,bash]
+----
+python oer_to_nkbip.py \
+    --nsec /path/to/key \
+    --relays wss://relay.com \
+    --oer-url [course-url] \
+    --to-adoc course_content.adoc
+----
+
+This creates a structured AsciiDoc file with:
+* All course metadata preserved as attributes
+* Each lecture/module as a level 2 section
+* Placeholder content marked with comments
+* Source URLs preserved for reference
+
+==== Editing Workflow
+
+1. **Export**: Use `--to-adoc` to create the AsciiDoc file
+2. **Edit**: Add actual content (transcripts, notes, exercises)
+3. **Convert**: Use `nip62_converter.py` to publish edited content
+4. **Publish**: Content becomes proper Nostr events with full text
+
+Example of exported structure:
+
+[source,asciidoc]
+----
+= Introduction to Biology
+:author: Prof. Jane Smith
+:published_on: 2024-01-15
+:license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+:tags: biology, science, introductory
+
+Course description and overview...
+
+== Lecture 1: Introduction
+
+_Source: https://ocw.mit.edu/courses/.../lecture-1/_
+
+// TODO: Add actual content here
+
+== Lecture 2: Cell Biology
+
+_Source: https://ocw.mit.edu/courses/.../lecture-2/_
+
+// TODO: Add actual content here
+----
+
+=== Parameters Reference
+
+[cols="1,3"]
+|===
+|Parameter |Description
+
+|`--nsec`
+|Nostr private key (nsec format or file path)
+
+|`--relays`
+|One or more relay URLs for publishing
+
+|`--oer-url`
+|OER resource URL(s). Multiple URLs create a collection
+
+|`--standalone`
+|Treat single resource as standalone publication
+
+|`--collection-title`
+|Custom title when using multiple URLs
+
+|`--sort-pattern`
+|Regex pattern for sorting. Can be used multiple times
+
+|`--to-adoc`
+|Export to AsciiDoc file instead of publishing
+
+|`--dry-run`
+|Preview what would be created without publishing
+
+|`--env-pw`
+|Environment variable containing decryption password
+
+|`-y, --yes`
+|Auto-confirm all prompts
+|===
+
+=== Supported OER Sources
+
+Currently supports resources indexed by OERSI, including:
+* MIT OpenCourseWare
+* Other universities and institutions indexed by OERSI
+
+The tool extracts:
+* Course/resource title and description
+* Author/instructor information
+* Publication date and publisher
+* License information
+* Keywords and subject classifications
+* Language metadata
+* Course structure (lectures, exams, modules)
